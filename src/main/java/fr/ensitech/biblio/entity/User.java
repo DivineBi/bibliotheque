@@ -3,10 +3,13 @@ package fr.ensitech.biblio.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
-@Table(name = "users", catalog = "biblio_database")
+@Table(name = "users")
 @Getter @Setter @ToString @NoArgsConstructor @AllArgsConstructor
 public class User {
 
@@ -23,7 +26,7 @@ public class User {
     @Column(name = "email", nullable = false, length = 48, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 48)
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
     @Column(name = "role", nullable = false, length = 1)
@@ -36,4 +39,18 @@ public class User {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name = "password_last_updated")
+    private LocalDateTime passwordLastUpdated;
+
+    // Relation vers SecurityQuestion
+    @ManyToOne
+    @JoinColumn(name = "security_question_id", nullable = false)
+    private SecurityQuestion securityQuestion;
+
+    @Column(name = "security_answer", nullable = false, length = 255)
+    private String securityAnswer; // réponse stockée hachée
+
+    // Relation vers l'historique des mots de passe
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PasswordHistory> passwordHistory = new ArrayList<>();
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "book", catalog = "biblio_database")
+@Table(name = "book")
 @Setter @Getter @ToString @NoArgsConstructor @AllArgsConstructor
 public class Book {
 

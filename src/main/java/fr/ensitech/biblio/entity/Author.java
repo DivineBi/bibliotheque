@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "author", catalog = "biblio_database")
+@Table(name = "author")
 @Setter @Getter @ToString @NoArgsConstructor @AllArgsConstructor
 public class Author {
 

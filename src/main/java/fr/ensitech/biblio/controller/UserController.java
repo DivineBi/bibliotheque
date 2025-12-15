@@ -30,11 +30,11 @@ public class UserController implements IUserController{
         }
         user.setRole(RoleEnum.C.toString());
         try {
-            userService.register(user);
-            return new ResponseEntity<User>(user, HttpStatus.CREATED);
+            User savedUser = userService.register(user);
+            return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<User>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -97,11 +97,117 @@ public class UserController implements IUserController{
         }
     }
 
+    // Mise à jour du profil
+    @PutMapping("/{email}/profile")
+    @Override
+    public ResponseEntity<String> updateProfile(@PathVariable String email, @RequestBody User updatedUser) {
+
+        try {
+            // Vérifier que l'email est valide
+            if (email == null || email.isBlank()) {
+                return new ResponseEntity<>("Email invalide.", HttpStatus.BAD_REQUEST);
+            }
+
+            // Vérifier que l'objet user n'est pas null
+            if (updatedUser == null) {
+                return new ResponseEntity<>("Données utilisateur manquantes.", HttpStatus.BAD_REQUEST);
+            }
+
+            // Vérifier que les champs sont bien renseignés
+            if (updatedUser.getFirstname() == null || updatedUser.getFirstname().isBlank()
+                    || updatedUser.getLastname() == null || updatedUser.getLastname().isBlank()) {
+                return new ResponseEntity<>("Le prénom et le nom sont obligatoires.", HttpStatus.BAD_REQUEST);
+            }
+
+            // Ne pas autoriser la modification de l'email, du mot de passe et de l'id
+            if (updatedUser.getEmail() != null || updatedUser.getPassword() != null || updatedUser.getId() != 0) {
+                return new ResponseEntity<>("La modification de l'email et du mot de passe sont interdits.", HttpStatus.BAD_REQUEST);
+            }
+
+            // Appel au service
+            String message = userService.updateProfile(email, updatedUser);
+            if (message.startsWith("Erreur")) {
+                return  new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            }
+
+            return ResponseEntity.ok(message);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Erreur lors de la mise à jour du profil: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    // Mise à jour du mot de passe
+    @PutMapping("/{email}/{oldPwd}/{newPwd}")
+    @Override
+    public ResponseEntity<String> updatePassword(@PathVariable String email, @PathVariable String oldPwd, @PathVariable String newPwd) {
+        try {
+            // Vérifier les champs
+            if (email == null || email.isBlank()
+                    || oldPwd == null || oldPwd.isBlank()
+                    || newPwd == null || newPwd.isBlank()) {
+                return new ResponseEntity<>("Email, ancien mot de passe et nouveau mot de passe sont obligatoires.", HttpStatus.BAD_REQUEST);
+            }
+
+            // Vérifier que le nouveau mot de passe est différent de l'ancien
+            if (oldPwd.equals(newPwd)) {
+                return new ResponseEntity<>("Le nouveau mot de passe doit être différent de l'ancien.", HttpStatus.BAD_REQUEST);
+            }
+
+            //Appel au service
+            String message = userService.updatePassword(email, oldPwd, newPwd);
+            if (message.startsWith("Erreur")) {
+                return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
+            }
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Erreur lors de la mise à jour du mot de passe : ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/email/{email}")
+    @Override
+    public ResponseEntity<User> getUserByEmail(@RequestParam(value = "email") String email) {
+        System.out.println("id = " + email);
+        if (email == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        try {
+            User user = userService.getUserByEmail(email);
+            return new ResponseEntity<User>(user, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/id/{id}")
+    @Override
+    public ResponseEntity<User> getUserById(@RequestParam(value = "id") Long id) {
+
+        System.out.println("id = " + id);
+        if (id <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        try {
+            User user = userService.getUserById(id);
+            return new ResponseEntity<User>(user, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private boolean isUserOk(User user) {
         return user != null
                 && user.getFirstname() != null && !user.getFirstname().isBlank()
                 && user.getLastname() != null && !user.getLastname().isBlank()
                 && user.getEmail() != null && !user.getEmail().isBlank()
-                && user.getPassword() != null && !user.getPassword().isBlank();
+                && user.getPassword() != null && !user.getPassword().isBlank()
+                && user.getSecurityQuestion() != null && user.getSecurityQuestion().getId() > 0
+                && user.getSecurityAnswer() != null && !user.getSecurityAnswer().isBlank();
     }
 }

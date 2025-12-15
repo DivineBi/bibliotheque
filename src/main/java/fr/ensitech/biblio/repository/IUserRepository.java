@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IUserRepository extends JpaRepository<User, Long> {
@@ -15,6 +16,6 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     List<User> findByFirstnameAndLastname(String firstName, String lastName);
     List<User> findByBirthdate(Date birthdate);
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
 }

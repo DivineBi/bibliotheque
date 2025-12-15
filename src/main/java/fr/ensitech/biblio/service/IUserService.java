@@ -13,8 +13,17 @@ public interface IUserService {
     List<User> getUsersByBirthdate(Date dateInf, Date dateSup) throws Exception;
 
     // Méthodes d'authentification de l'utilisateur
-    String register(User user) throws Exception;
+    User register(User user) throws Exception;
+    void sendActivationEmail(User user) throws Exception;
     String activate(String email) throws Exception;
     String login(String email, String password) throws Exception;
     String unsubscribe(String email) throws Exception;
+
+    // Méthodes pour la mise à jour
+    String updateProfile(String email, User updatedUser) throws Exception;
+    String updatePassword(String email, String oldPwd, String newPwd) throws Exception;
+
+    // Méthodes pour sécuriser le mot de passe
+    boolean isPasswordExpired(User user) throws Exception;
+    boolean renewPassword(String email, String oldPassword, String newPassword) throws Exception;
 }
