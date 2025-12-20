@@ -16,8 +16,10 @@ public interface IUserService {
     User register(User user) throws Exception;
     void sendActivationEmail(User user) throws Exception;
     String activate(String email) throws Exception;
+    void sendActivationNotification(User user) throws Exception;
     String login(String email, String password) throws Exception;
     String unsubscribe(String email) throws Exception;
+    void sendUnsubscribeConfirmation(User user) throws Exception;
 
     // Méthodes pour la mise à jour
     String updateProfile(String email, User updatedUser) throws Exception;

@@ -66,8 +66,11 @@ public class UserService implements IUserService {
 
         // Hachage de la réponse à la question secrète
         user.setSecurityAnswer(passwordEncoder.encode(user.getSecurityAnswer()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
+        // Envoi automatique d'email d'activation
+        sendActivationEmail(savedUser);
+        return savedUser;
     }
 
     @Override
@@ -94,15 +97,18 @@ public class UserService implements IUserService {
 
         user.setActive(true);
         userRepository.save(user);
+        sendActivationNotification(user);
+        return "Activation réussie";
+    }
 
+    @Override
+    public void sendActivationNotification(User user) throws Exception {
         // Notification d’activation
         emailService.sendEmail(
                 user.getEmail(),
                 "Votre compte est activé",
                 "Bonjour " + user.getFirstname() + ",\n\nVotre compte est désormais actif."
         );
-
-        return "Activation réussie";
     }
 
     @Override
@@ -138,15 +144,19 @@ public class UserService implements IUserService {
 
         user.setActive(false);  // rendre INACTIF
         userRepository.save(user);
+        sendUnsubscribeConfirmation(user);
+        return "Compte désinscrit : l'utilisateur est désormais INACTIF.";
 
+    }
+
+    @Override
+    public void sendUnsubscribeConfirmation(User user) throws Exception {
         // Confirmation de désinscription
         emailService.sendEmail(
-                email,
+                user.getEmail(),
                 "Confirmation de désinscription",
                 "Bonjour " + user.getFirstname() + ",\n\nVotre compte a été désactivé. Merci d’avoir utilisé notre service."
         );
-
-        return "Compte désinscrit : l'utilisateur est désormais INACTIF.";
 
     }
 

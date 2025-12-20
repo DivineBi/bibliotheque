@@ -1,5 +1,6 @@
 package fr.ensitech.biblio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,5 +22,6 @@ public class SecurityQuestion {
     private String question;
 
     @OneToMany(mappedBy = "securityQuestion", cascade = CascadeType.ALL, orphanRemoval = false)
+    @JsonIgnore
     private List<User> users = new ArrayList<>();
 }

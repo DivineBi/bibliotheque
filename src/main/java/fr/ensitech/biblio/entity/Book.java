@@ -13,6 +13,7 @@ import java.util.Set;
 @Entity
 @Table(name = "book")
 @Setter @Getter @ToString @NoArgsConstructor @AllArgsConstructor
+@Builder
 public class Book {
 
     @Id
@@ -51,7 +52,9 @@ public class Book {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "author_book",
-                joinColumns = @JoinColumn(name = "author_id"),
-                inverseJoinColumns = @JoinColumn(name = "book_id"))
+                joinColumns = @JoinColumn(name = "book_id"), //FK vers Book
+                inverseJoinColumns = @JoinColumn(name = "author_id")) // FK vers Author
+
+    @Singular
     private Set<Author> authors = new HashSet<Author>();
 }

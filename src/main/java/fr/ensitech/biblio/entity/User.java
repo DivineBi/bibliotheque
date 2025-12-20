@@ -1,5 +1,6 @@
 package fr.ensitech.biblio.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,6 +35,7 @@ public class User {
 
     @Column(name = "birthdate", nullable = true)
     @Temporal(TemporalType.DATE)
+    @JsonFormat(pattern =  "yyyy-MM-dd")
     private Date birthdate;
 
     @Column(name = "active", nullable = false)
