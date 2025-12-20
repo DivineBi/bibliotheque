@@ -57,4 +57,7 @@ public class Book {
 
     @Singular
     private Set<Author> authors = new HashSet<Author>();
+
+    @Column(nullable = false, length = 5)
+    private int quantity;
 }

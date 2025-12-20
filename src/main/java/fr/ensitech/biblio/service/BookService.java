@@ -42,6 +42,11 @@ public class BookService implements IBookService {
 
             book.setAuthors(validatedAuthors);
 
+            // Check quantity
+            if (book.getQuantity() <=0) {
+                book.setQuantity(1);
+            }
+
             //Sauvegarde d'un nouveau livre
             return bookRepository.save(book);
         }
@@ -125,22 +130,11 @@ public class BookService implements IBookService {
 
     @Override
     public List<Book> getBooksByAuthor(Author author) throws Exception {
-        return bookRepository.findByAuthor(author);
+        return bookRepository.findByAuthors(author);
     }
 
     @Override
     public List<Book> getBooksBetweenYears(int startYear, int endYear) throws Exception {
-        //Calendar startCalendar = Calendar.getInstance();
-        //startCalendar.set(Calendar.YEAR, startYear);
-        //startCalendar.set(Calendar.MONTH, Calendar.JANUARY);
-        //startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-        //Date startDate = startCalendar.getTime();
-
-        //Calendar endCalendar = Calendar.getInstance();
-        //endCalendar.set(Calendar.YEAR, endYear);
-        //endCalendar.set(Calendar.MONTH, Calendar.DECEMBER);
-        //endCalendar.set(Calendar.DAY_OF_MONTH, 31);
-        //Date endDate = endCalendar.getTime();
 
         Date startDate = Dates.convertStringToDate("01/01/" + startYear);
         Date endDate = Dates.convertStringToDate("31/12/" + endYear);
@@ -165,7 +159,7 @@ public class BookService implements IBookService {
 
     @Override
     public List<Book> findByAuthor(Author author) throws Exception{
-        return bookRepository.findByAuthor(author);
+        return bookRepository.findByAuthors(author);
     }
 
 

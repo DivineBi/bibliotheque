@@ -81,9 +81,6 @@ public class UserController implements IUserController{
         }
     }
 
-
-
-
     // Désactiver le compte
     @PutMapping("/unsubscribe")
     @Override
@@ -98,13 +95,12 @@ public class UserController implements IUserController{
     }
 
     // Mise à jour du profil
-    @PutMapping("/{email}/profile")
+    @PutMapping("/{id}/profile")
     @Override
-    public ResponseEntity<String> updateProfile(@PathVariable String email, @RequestBody User updatedUser) {
-
+    public ResponseEntity<String> updateProfile(@PathVariable long id, @RequestBody User updatedUser) {
         try {
-            // Vérifier que l'email est valide
-            if (email == null || email.isBlank()) {
+            // Vérifier que l'id est valide
+            if (id <=0) {
                 return new ResponseEntity<>("Email invalide.", HttpStatus.BAD_REQUEST);
             }
 
@@ -125,7 +121,7 @@ public class UserController implements IUserController{
             }
 
             // Appel au service
-            String message = userService.updateProfile(email, updatedUser);
+            String message = userService.updateProfile(id, updatedUser);
             if (message.startsWith("Erreur")) {
                 return  new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
             }
@@ -140,12 +136,16 @@ public class UserController implements IUserController{
     }
 
     // Mise à jour du mot de passe
-    @PutMapping("/{email}/{oldPwd}/{newPwd}")
+    @PutMapping("/{id}/{oldPwd}/{newPwd}")
     @Override
-    public ResponseEntity<String> updatePassword(@PathVariable String email, @PathVariable String oldPwd, @PathVariable String newPwd) {
+    public ResponseEntity<String> updatePassword(
+            @PathVariable long id,
+            @PathVariable String oldPwd,
+            @PathVariable String newPwd) {
+
         try {
             // Vérifier les champs
-            if (email == null || email.isBlank()
+            if (id <= 0
                     || oldPwd == null || oldPwd.isBlank()
                     || newPwd == null || newPwd.isBlank()) {
                 return new ResponseEntity<>("Email, ancien mot de passe et nouveau mot de passe sont obligatoires.", HttpStatus.BAD_REQUEST);
@@ -157,7 +157,7 @@ public class UserController implements IUserController{
             }
 
             //Appel au service
-            String message = userService.updatePassword(email, oldPwd, newPwd);
+            String message = userService.updatePassword(id, oldPwd, newPwd);
             if (message.startsWith("Erreur")) {
                 return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
             }

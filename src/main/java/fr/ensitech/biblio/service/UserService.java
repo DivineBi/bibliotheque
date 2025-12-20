@@ -161,8 +161,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public String updateProfile(String email, User updatedUser) throws Exception {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    public String updateProfile(long id, User updatedUser) throws Exception {
+        Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return "Erreur : utilisateur introuvable.";
         }
@@ -178,8 +178,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public String updatePassword(String email, String oldPwd, String newPwd) throws Exception {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    public String updatePassword(long id, String oldPwd, String newPwd) throws Exception {
+        Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return "Erreur : utilisateur introuvable";
         }

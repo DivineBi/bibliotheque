@@ -266,10 +266,10 @@ public class BookServiceTest {
     @Test
     @SneakyThrows
     void shouldFindBooksByAuthor() {
-        when(bookRepository.findByAuthor(author1)).thenReturn(List.of(book));
+        when(bookRepository.findByAuthors(author1)).thenReturn(List.of(book));
 
         List<Book> books = bookService.getBooksByAuthor(author1);
-        verify(bookRepository).findByAuthor(author1);
+        verify(bookRepository).findByAuthors(author1);
     }
 
     @Test

@@ -22,8 +22,8 @@ public interface IUserService {
     void sendUnsubscribeConfirmation(User user) throws Exception;
 
     // Méthodes pour la mise à jour
-    String updateProfile(String email, User updatedUser) throws Exception;
-    String updatePassword(String email, String oldPwd, String newPwd) throws Exception;
+    String updateProfile(long id, User updatedUser) throws Exception;
+    String updatePassword(long id, String oldPwd, String newPwd) throws Exception;
 
     // Méthodes pour sécuriser le mot de passe
     boolean isPasswordExpired(User user) throws Exception;
