@@ -5,20 +5,29 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "book")
+@Table(
+        name = "books",
+        indexes = {
+                @Index(name = "idx_book_title", columnList = "title"),
+                @Index(name = "idx_book_category", columnList = "category"),
+                @Index(name = "idx_book_language", columnList = "language"),
+                @Index(name = "idx_book_published", columnList = "published"),
+        }
+)
 @Setter @Getter @ToString @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -33,16 +42,13 @@ public class Book {
     private String editor;
 
     @Column(nullable = false)
-    @Temporal(TemporalType.DATE)
-    //@DateTimeFormat(pattern = "dd/MM/yyyy")
-    @JsonFormat(pattern="dd/MM/yyyy", timezone="Europe/Zagreb")
-    private Date publishedDate;
+    private LocalDate publicationDate;
 
     @Column(nullable = false, length = 20, unique = true)
     private String isbn;
 
     @Column(nullable = false)
-    private short nbPages;
+    private int nbPages;
 
     @Column(nullable = false, length = 48)
     private String category;
@@ -58,6 +64,6 @@ public class Book {
     @Singular
     private Set<Author> authors = new HashSet<Author>();
 
-    @Column(nullable = false, length = 5)
-    private int quantity;
+    //@Column(nullable = false)
+    //private int quantity;
 }

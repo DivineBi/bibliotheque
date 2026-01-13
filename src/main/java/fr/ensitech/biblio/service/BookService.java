@@ -6,6 +6,8 @@ import fr.ensitech.biblio.repository.IAuthorRepository;
 import fr.ensitech.biblio.repository.IBookRepository;
 import fr.ensitech.biblio.utils.Dates;
 import jakarta.el.ELException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ import java.util.*;
 
 @Service
 public class BookService implements IBookService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private IBookRepository bookRepository;
@@ -107,6 +112,10 @@ public class BookService implements IBookService {
         }
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Book not found !"));
+
+        // Clean relation ManyToMany
+        //book.getAuthors().clear();
+        bookRepository.save(book);
 
         bookRepository.deleteById(id);
     }

@@ -1,16 +1,14 @@
 package fr.ensitech.biblio.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "password_history")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Builder
 public class PasswordHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

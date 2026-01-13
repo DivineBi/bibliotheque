@@ -3,68 +3,135 @@ package fr.ensitech.biblio.service;
 import fr.ensitech.biblio.entity.Book;
 import fr.ensitech.biblio.entity.Reservation;
 import fr.ensitech.biblio.entity.User;
+import fr.ensitech.biblio.entity.dto.ReservationCreateDto;
+import fr.ensitech.biblio.entity.dto.ReservationDto;
+import fr.ensitech.biblio.enums.ReservationStatus;
 import fr.ensitech.biblio.repository.IBookRepository;
 import fr.ensitech.biblio.repository.IReservationRepository;
 import fr.ensitech.biblio.repository.IUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+
+import java.util.EnumSet;
+import java.util.List;
+
 
 @Service
+@Transactional
 public class ReservationService implements IReservationService {
+    private final IReservationRepository reservationRepository;
+    private final IUserRepository userRepository;
+    private final IBookRepository bookRepository;
 
-    @Autowired
-    private IUserRepository userRepository;
+    public ReservationService(IReservationRepository reservationRepository,
+                              IUserRepository userRepository,
+                              IBookRepository bookRepository) {
+        this.reservationRepository = reservationRepository;
+        this.userRepository = userRepository;
+        this.bookRepository = bookRepository;
+    }
 
-    @Autowired
-    private IBookRepository bookRepository;
 
-    @Autowired
-    private IReservationRepository reservationRepository;
 
     @Override
-    public String reserveBook(long bookId, String email) throws Exception {
+    public ReservationDto create(Long userId, ReservationCreateDto dto) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("Utilisateur introuvable"));
 
-        // Check user
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isEmpty()) {
-            return "Erreur : utilisateur introuvable.";
-        }
-        User user = optionalUser.get();
+        Book book = bookRepository.findById(dto.bookId())
+                .orElseThrow(() -> new Exception("Livre introuvable"));
 
-        // check book
-        Optional<Book> optionalBook = bookRepository.findById(bookId);
-        if (optionalBook.isEmpty()) {
-            return "Erreur: livre introuvable.";
-        }
-        Book book = optionalBook.get();
-
-        // User cannot reserve more than 3 books
-        int reservationsUser = reservationRepository.countByUser(user);
-        if (reservationsUser >= 3) {
-            return "Erreur : limite de 3 réservations atteinte.";
+        // Vérifier si le livre est déjà réservé
+        List<ReservationStatus> activeStatuses = List.copyOf(
+                EnumSet.of(ReservationStatus.CREATED, ReservationStatus.CONFIRMED)
+        );
+        if (reservationRepository.existsByBookIdAndStatusIn(book.getId(), activeStatuses)) {
+            throw new Exception("Livre déjà réservé.");
         }
 
-        // User cannot reserve twice the same book
-        if (reservationRepository.existsByUserAndBook(user, book)) {
-            return "Erreur: vous avez déjà réservé ce livre.";
+        Reservation reservation = Reservation.builder()
+                .user(user)
+                .book(book)
+                .startDate(dto.startDate())
+                .endDate(dto.endDate())
+                .status(ReservationStatus.CREATED)
+                .build();
+
+        Reservation saved = reservationRepository.save(reservation);
+        return toDto(saved);
+    }
+
+
+
+    @Override
+    public void cancel(Long reservationId, Long userId) throws Exception {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new Exception("Réservation introuvable"));
+
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new Exception("Cette réservation n'appartient pas à cet utilisateur.");
         }
 
-        // Check stock availability
-        int reservationsBook = reservationRepository.countByBook(book);
-        if (reservationsBook >= book.getQuantity()) {
-            return "Erreur : toutes les copies disponibles ont déjà été réservées.";
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.RETURNED
+                || reservation.getStatus() == ReservationStatus.EXPIRED) {
+            return;
         }
 
-        // Création de la réservation
-        Reservation reservation = new Reservation();
-        reservation.setUser(user);
-        reservation.setBook(book);
-        reservation.setReservedAt(LocalDateTime.now());
+        reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
 
-        return "Réservation effectuée avec succès.";
+    }
+
+    @Override
+    public void confirm(Long reservationId) throws Exception {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new Exception("Réservation introuvable"));
+
+        if (reservation.getStatus() != ReservationStatus.CREATED) {
+            throw new Exception("Seules les réservations crées peuvent être confirmées.");
+        }
+
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservationRepository.save(reservation);
+    }
+
+    @Override
+    public void returnBook(Long reservationId) throws Exception {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new Exception("Réservation introuvable"));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new Exception("Seules les réservations confirmées peuvent être retournées.");
+        }
+
+        reservation.setStatus(ReservationStatus.RETURNED);
+        reservationRepository.save(reservation);
+
+    }
+
+    @Override
+    public List<ReservationDto> userReservations(Long userId) throws Exception {
+        if (!userRepository.existsById(userId)) {
+            throw new Exception("Utilisateur introuvable");
+        }
+
+        return reservationRepository.findByUserId(userId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    private ReservationDto toDto(Reservation reservation) {
+        return new ReservationDto(
+                reservation.getId(),
+                reservation.getBook().getId(),
+                reservation.getBook().getTitle(),
+                reservation.getUser().getId(),
+                reservation.getStartDate(),
+                reservation.getEndDate(),
+                reservation.getStatus()
+        );
     }
 }

@@ -61,7 +61,7 @@ public class BookServiceTest {
                 .language("FR")
                 .published(true)
                 .publishedDate(Dates.convertStringToDate("15/03/2000"))
-                .authors(Set.of(author1, author2))
+                .authors(new ArrayList<>(List.of(author1, author2)))
                 .build();
     }
 
