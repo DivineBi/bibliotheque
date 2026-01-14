@@ -61,9 +61,9 @@ public class Book {
                 joinColumns = @JoinColumn(name = "book_id"), //FK vers Book
                 inverseJoinColumns = @JoinColumn(name = "author_id")) // FK vers Author
 
-    @Singular
+    @Builder.Default
     private Set<Author> authors = new HashSet<Author>();
 
-    //@Column(nullable = false)
-    //private int quantity;
+    @Column
+    private int quantity;
 }

@@ -36,7 +36,7 @@ public class Reservation {
     // ---------------Dates----------------------------
 
     @Column(name = "reservation_date", nullable = false)
-    private LocalDate reservationDate;
+    private LocalDateTime reservationDate;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;

@@ -61,7 +61,7 @@ public class UserService implements IUserService {
         }
 
         // Hachage du mot de passe
-        user.setPassword(passwordEncoder.encode(user.getPassword())); //hachage
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash())); //hachage
         user.setActive(false); // Compte INACTIF lors de la création
 
         // Hachage de la réponse à la question secrète
@@ -119,7 +119,7 @@ public class UserService implements IUserService {
         }
         User user = optionalUser.get();
 
-        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
             return "Erreur : identifiants invalides.";
         }
 
@@ -186,7 +186,7 @@ public class UserService implements IUserService {
         User user = optionalUser.get();
 
         // Vérification de l'ancien mot de passe avec BCrypt
-        if (!passwordEncoder.matches(oldPwd, user.getPassword())) {
+        if (!passwordEncoder.matches(oldPwd, user.getPasswordHash())) {
             return "Erreur : ancien mot passe incorrect.";
         }
 
@@ -198,12 +198,12 @@ public class UserService implements IUserService {
         // Sauvegarde dans l'historique
         PasswordHistory history = new PasswordHistory();
         history.setUser(user);
-        history.setOldPasswordHash(user.getPassword());
+        history.setOldPasswordHash(user.getPasswordHash());
         history.setChangedAt(LocalDateTime.now());
         passwordHistoryRepository.save(history);
 
         // Hachage et mise à jour du nouveau mot de passe
-        user.setPassword(passwordEncoder.encode(newPwd));
+        user.setPasswordHash(passwordEncoder.encode(newPwd));
         user.setPasswordLastUpdated(LocalDateTime.now());
         userRepository.save(user);
 
@@ -234,12 +234,12 @@ public class UserService implements IUserService {
         // Sauvegarde dans l'historique
         PasswordHistory history = new PasswordHistory();
         history.setUser(user);
-        history.setOldPasswordHash(user.getPassword());
+        history.setOldPasswordHash(user.getPasswordHash());
         history.setChangedAt(LocalDateTime.now());
         passwordHistoryRepository.save(history);
 
         // Mets à jour le mot de passe
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setPasswordLastUpdated(LocalDateTime.now());
         userRepository.save(user);
 

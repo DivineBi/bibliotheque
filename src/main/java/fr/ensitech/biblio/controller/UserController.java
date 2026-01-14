@@ -1,7 +1,7 @@
 package fr.ensitech.biblio.controller;
 
 import fr.ensitech.biblio.entity.User;
-import fr.ensitech.biblio.enums.RoleEnum;
+import fr.ensitech.biblio.enums.Role;
 import fr.ensitech.biblio.service.IUserService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
@@ -28,7 +28,7 @@ public class UserController implements IUserController{
         if (!isUserOk(user)) {
             return new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
         }
-        user.setRole(RoleEnum.C.toString());
+        user.setRole(Role.USER);
         try {
             User savedUser = userService.register(user);
             return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
@@ -116,7 +116,7 @@ public class UserController implements IUserController{
             }
 
             // Ne pas autoriser la modification de l'email, du mot de passe et de l'id
-            if (updatedUser.getEmail() != null || updatedUser.getPassword() != null || updatedUser.getId() != 0) {
+            if (updatedUser.getEmail() != null || updatedUser.getPasswordHash() != null || updatedUser.getId() != 0) {
                 return new ResponseEntity<>("La modification de l'email et du mot de passe sont interdits.", HttpStatus.BAD_REQUEST);
             }
 
@@ -206,7 +206,7 @@ public class UserController implements IUserController{
                 && user.getFirstname() != null && !user.getFirstname().isBlank()
                 && user.getLastname() != null && !user.getLastname().isBlank()
                 && user.getEmail() != null && !user.getEmail().isBlank()
-                && user.getPassword() != null && !user.getPassword().isBlank()
+                && user.getPasswordHash() != null && !user.getPasswordHash().isBlank()
                 && user.getSecurityQuestion() != null && user.getSecurityQuestion().getId() > 0
                 && user.getSecurityAnswer() != null && !user.getSecurityAnswer().isBlank();
     }

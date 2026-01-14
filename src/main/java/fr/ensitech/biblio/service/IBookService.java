@@ -2,7 +2,9 @@ package fr.ensitech.biblio.service;
 
 import fr.ensitech.biblio.entity.Author;
 import fr.ensitech.biblio.entity.Book;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IBookService {
@@ -15,7 +17,9 @@ public interface IBookService {
     List<Book> getBooksByAuthor(Author author) throws Exception;
     List<Book> getBooksBetweenYears(int startYear, int endYear) throws Exception;
     List<Book> getBooksByPublished(boolean published);
+    List<Book> getBooksByPublicationDate(LocalDate publicationDate) throws Exception;
     Book getBookByIsbn(String isbn) throws Exception;
     List<Book> getBooksByTitleOrDescription(String title, String description) throws Exception;
     List<Book> findByAuthor(Author author) throws Exception;
+
 }

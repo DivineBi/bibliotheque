@@ -80,7 +80,7 @@ public class BookController implements IBookController {
     @Override
 // => http://localhost:8080/api/books/book?id=3
     @GetMapping("/book")
-    public ResponseEntity<Book> getBookById(@RequestParam(value = "id", required = true) long id) {
+    public ResponseEntity<Book> getBookById(@RequestParam(value = "id", required = true) Long id) {
 
 // => http://localhost:8080/api/books/book/3
 //    @GetMapping("/book/{id}")
@@ -119,7 +119,7 @@ public class BookController implements IBookController {
     // => http://localhost:8080/api/books/remove/5
     @Override
     @DeleteMapping("/remove/{id}")
-    public ResponseEntity<String> deleteBook(@PathVariable("id") @RequestParam(required = true) long id) {
+    public ResponseEntity<String> deleteBook(@PathVariable("id") @RequestParam(required = true) Long id) {
         if (id <= 0) {
             return new ResponseEntity<String>("book id must be greater than 0", HttpStatus.BAD_REQUEST);
         }
@@ -149,13 +149,30 @@ public class BookController implements IBookController {
         }
     }
 
+    @GetMapping("/published-date")
+    @Override
+    public ResponseEntity<List<Book>> getBooksByPublicationDate(@RequestParam LocalDate date) {
+        try {
+            List<Book> books = bookService.getBooksByPublicationDate(date);
+
+            if (books == null || books.isEmpty()) {
+                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(books, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private boolean isBookOk(Book book) {
         return book != null
                 && book.getIsbn() != null && !book.getIsbn().isBlank()
                 && book.getTitle() != null && !book.getTitle().isBlank()
                 && book.getDescription() != null && !book.getDescription().isBlank()
                 && book.getEditor() != null && !book.getEditor().isBlank()
-                && book.getPublishedDate() != null
+                && book.getPublicationDate() != null
                 && book.getCategory() != null && !book.getCategory().isBlank()
                 && book.getLanguage() != null && !book.getLanguage().isBlank()
                 && book.getNbPages() > 0;

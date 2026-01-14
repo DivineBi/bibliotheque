@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -76,7 +77,7 @@ public class BookService implements IBookService {
             _book.setTitle(book.getTitle());
             _book.setDescription(book.getDescription());
             _book.setEditor(book.getEditor());
-            _book.setPublishedDate(book.getPublishedDate());
+            _book.setPublicationDate(book.getPublicationDate());
             _book.setCategory(book.getCategory());
             _book.setLanguage(book.getLanguage());
             _book.setNbPages(book.getNbPages());
@@ -145,10 +146,15 @@ public class BookService implements IBookService {
     @Override
     public List<Book> getBooksBetweenYears(int startYear, int endYear) throws Exception {
 
-        Date startDate = Dates.convertStringToDate("01/01/" + startYear);
-        Date endDate = Dates.convertStringToDate("31/12/" + endYear);
+        LocalDate startDate = LocalDate.of(startYear, 1, 1);
+        LocalDate endDate = LocalDate.of(endYear, 12, 31);
 
-        return bookRepository.findByPublishedDateBetween(startDate, endDate);
+        return bookRepository.findByPublicationDateBetween(startDate, endDate);
+    }
+
+    @Override
+    public List<Book> getBooksByPublicationDate(LocalDate publicationDate) throws Exception {
+        return bookRepository.findByPublicationDate(publicationDate);
     }
 
     @Override
